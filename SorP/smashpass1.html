@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smash or Pass</title>
+  <link rel="stylesheet" href="/css&jh/pass.css">
+</head>
+<body>
+
+  <header>
+    <h1>Smash or Pass</h1>
+    <p>Perdon par la calidad de algunas imagenes<div class="mini" onclick="alert('Gracias Quijote por dejarme poner tus dibujos ,y a los demas del Discord🫂.')">Gracias</div>
+</p>
+  </header>
+
+  <main class="game-container" id="game">
+    <div id="card-container">
+      <img id="current-image" src="" alt="Imagen del juego">
+    </div>
+
+    <div class="buttons">
+      <button id="pass-btn">❌ Pass</button>
+      <button id="smash-btn">🔥 Smash</button>
+    </div>
+
+    <div id="live-reaction" class="reaction-text"></div>
+  </main>
+
+  <div id="result" class="hidden">
+    <img id="result-image" src="https://i.imgur.com/AFzQk4n.png" alt="Final image" />
+    <h2>Resultados</h2>
+    <p id="smash-count"></p>
+    <p id="pass-count"></p>
+    <p id="comment"></p>
+    <button onclick="location.reload()">Volver a jugar</button>
+  </div>
+
+  <script src="pass1.js"></script>
+  <a href="../index.html" class="circle-btn"></a>
+</body>
+</html>

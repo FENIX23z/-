@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
+        }
+        canvas {
+            background-color: #111;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Puntuación: <span id="score">0</span></h1>
+    <canvas width="300" height="600" id="tetris"></canvas>
+    <script>
+        const canvas = document.getElementById("tetris");
+        const ctx = canvas.getContext("2d");
+        const ROWS = 20;
+        const COLS = 10;
+        const SQ = 30;
+        const board = Array.from({ length: ROWS }, () => Array(COLS).fill("black"));
+        const colors = ["cyan", "blue", "orange", "yellow", "green", "purple", "red"];
+        let score = 0;
+        let dropInterval = 1000;
+        let lastTime = 0;
+        let dropCounter = 0;
+        
+        function drawSquare(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x * SQ, y * SQ, SQ, SQ);
+            ctx.strokeStyle = "white";
+            ctx.strokeRect(x * SQ, y * SQ, SQ, SQ);
+        }
+        
+        function drawBoard() {
+            board.forEach((row, y) => {
+                row.forEach((color, x) => {
+                    drawSquare(x, y, color);
+                });
+            });
+        }
+        
+        function removeLines() {
+            for (let y = ROWS - 1; y >= 0; y--) {
+                if (board[y].every(cell => cell !== "black")) {
+                    board.splice(y, 1);
+                    board.unshift(Array(COLS).fill("black"));
+                    score += 100;
+                    document.getElementById("score").innerText = score;
+                    y++; 
+                }
+            }
+        }
+        
+        const tetrominoes = [
+            [[1, 1, 1, 1]],
+            [[1, 1], [1, 1]],
+            [[0, 1, 1], [1, 1, 0]],
+            [[1, 1, 0], [0, 1, 1]],
+            [[1, 1, 1], [0, 1, 0]],
+            [[1, 1, 1], [1, 0, 0]],
+            [[1, 1, 1], [0, 0, 1]]
+        ];
+        
+        let currentPiece = {
+            shape: tetrominoes[Math.floor(Math.random() * tetrominoes.length)],
+            x: 4,
+            y: 0,
+            color: colors[Math.floor(Math.random() * colors.length)]
+        };
+        
+        function drawPiece(piece) {
+            piece.shape.forEach((row, y) => {
+                row.forEach((cell, x) => {
+                    if (cell) drawSquare(piece.x + x, piece.y + y, piece.color);
+                });
+            });
+        }
+        
+        function move(dir) {
+            currentPiece.x += dir;
+            if (collision()) {
+                currentPiece.x -= dir;
+            }
+        }
+        
+        function rotate() {
+            const tempShape = currentPiece.shape[0].map((_, i) => currentPiece.shape.map(row => row[i])).reverse();
+            const oldShape = currentPiece.shape;
+            currentPiece.shape = tempShape;
+            if (collision()) {
+                currentPiece.shape = oldShape;
+            }
+        }
+        
+        function drop() {
+            currentPiece.y++;
+            if (collision()) {
+                currentPiece.y--;
+                mergePiece();
+                removeLines();
+                spawnPiece();
+            }
+        }
+        
+        function collision() {
+            return currentPiece.shape.some((row, y) => {
+                return row.some((cell, x) => {
+                    return cell && (
+                        currentPiece.x + x < 0 ||
+                        currentPiece.x + x >= COLS ||
+                        currentPiece.y + y >= ROWS ||
+                        board[currentPiece.y + y]?.[currentPiece.x + x] !== "black"
+                    );
+                });
+            });
+        }
+        
+        function mergePiece() {
+            currentPiece.shape.forEach((row, y) => {
+                row.forEach((cell, x) => {
+                    if (cell) board[currentPiece.y + y][currentPiece.x + x] = currentPiece.color;
+                });
+            });
+        }
+        
+        function spawnPiece() {
+            currentPiece = {
+                shape: tetrominoes[Math.floor(Math.random() * tetrominoes.length)],
+                x: 4,
+                y: 0,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            };
+            if (collision()) {
+                alert("Game Over!");
+                board.forEach(row => row.fill("black"));
+                score = 0;
+                document.getElementById("score").innerText = score;
+            }
+        }
+        
+        function update(time = 0) {
+            const deltaTime = time - lastTime;
+            lastTime = time;
+            dropCounter += deltaTime;
+            if (dropCounter > dropInterval) {
+                drop();
+                dropCounter = 0;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBoard();
+            drawPiece(currentPiece);
+            requestAnimationFrame(update);
+        }
+        
+        document.addEventListener("keydown", event => {
+            if (event.key === "ArrowLeft") move(-1);
+            if (event.key === "ArrowRight") move(1);
+            if (event.key === "ArrowDown") drop();
+            if (event.key === "ArrowUp") rotate();
+        });
+        
+        update();
+    </script>
+</body>
+</html>
