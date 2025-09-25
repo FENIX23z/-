@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Anime con Emojis</title>
+  <style>
+    body { background:#121212; color:#FFA500; font-family:Arial, sans-serif; text-align:center; margin:0; }
+    header { background:#1E1E1E; padding:15px; display:flex; justify-content:space-between; align-items:center; }
+    header img { max-height:50px; }
+    .quiz-container { margin:30px auto; max-width:600px; background:#1E1E1E; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(255,140,0,0.3); }
+    #media-container { margin:15px 0; font-size:4rem; }
+    #media-container img, #media-container iframe { width:80%; border-radius:8px; }
+    .answer-btn { display:block; width:80%; margin:10px auto; padding:12px; background:#333; border:2px solid #FFA500; color:#FFA500; border-radius:8px; cursor:pointer; font-size:18px; transition:0.3s; }
+    .answer-btn:hover { background:#444; }
+    .answer-btn.correct { background:#2e7d32; color:white; }
+    .answer-btn.wrong { background:#c62828; color:white; }
+    #next-btn { margin-top:20px; padding:10px 15px; font-size:16px; background:#FF4500; color:white; border:none; border-radius:5px; cursor:pointer; }
+    #next-btn.hidden { display:none; }
+    .score-board { margin-top:15px; font-size:18px; color:#FFA500; }
+    .final-message { margin-top:20px; font-size:22px; font-weight:bold; color:#FF6347; }
+    .final-img { margin-top:30px; max-width:80%; border-radius:10px; }
+    .circle-btn { position:fixed; bottom:20px; right:20px; width:50px; height:50px; background:#FF4500 url('https://cdn-icons-png.flaticon.com/512/2484/2484004.png') center/cover no-repeat; border-radius:50%; box-shadow:0 4px 8px rgba(0,0,0,0.2); }
+    .circle-btn:hover { background-color:#FF6347; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="https://fenix23z.github.io/-/img/animecup.png" alt="Anime Cup Logo">
+    </div>
+    <div class="creator">Adivina el Anime por Emojis 🎭</div>
+  </header>
+  <a href="../index.html" class="circle-btn"></a>
+
+  <main class="quiz-container">
+    <h2 id="question-title">Pregunta</h2>
+    <div id="media-container"></div>
+    <div id="answers"></div>
+    <button id="next-btn" class="hidden">Siguiente</button>
+    <div class="score-board">
+      ✅ Correctas: <span id="score-good">0</span> | ❌ Incorrectas: <span id="score-bad">0</span>
+    </div>
+    <div id="final-message" class="final-message"></div>
+  </main>
+
+  <!-- 🔹 Preguntas -->
+  <script type="application/json" id="quiz-data">
+  [
+    { "title": "¿Qué anime es?",
+      "emoji": "🧙‍♂️🐉⚔️",
+      "answers": ["Fairy Tail", "Slayers", "Dragon Quest", "Konosuba"],
+      "correct": 2
+    },
+    { "title": "¿Qué anime es?",
+      "emoji": "🍣👊🏻🔥",
+      "answers": ["Naruto", "Bleach", "One Piece", "Toriko"],
+      "correct": 0
+    },
+    { "title": "¿Qué anime es?",
+      "emoji": "👓⚡🏫",
+      "answers": ["Blue Exorcist", "Bungou Stray Dogs", "Harry Potter", "My Hero Academia"],
+      "correct": 3
+    },
+    { "title": "¿Qué anime es?",
+      "emoji": "👩🏻‍⚕️⚰️⭐",
+      "answers": ["Black Clover", "Oshi no Ko", "Angel Beats", "Anohana"],
+      "correct": 1
+    },
+    { "title": "¿Qué anime es?",
+      "emoji": "🥦👊🏻👩🏻‍🦰",
+      "answers": ["Boruto", "Hunter x Hunter", "My Hero Academia", "Mob Psycho 100"],
+      "correct": 2
+    }
+  ]
+  </script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const questions = JSON.parse(document.getElementById("quiz-data").textContent);
+    let currentQ = 0, good = 0, bad = 0;
+
+    const titleEl = document.getElementById("question-title");
+    const mediaEl = document.getElementById("media-container");
+    const answersEl = document.getElementById("answers");
+    const nextBtn = document.getElementById("next-btn");
+    const scoreGoodEl = document.getElementById("score-good");
+    const scoreBadEl = document.getElementById("score-bad");
+    const finalMessageEl = document.getElementById("final-message");
+
+    function loadQuestion() {
+      let q = questions[currentQ];
+      titleEl.textContent = q.title;
+
+      mediaEl.innerHTML = "";
+      answersEl.innerHTML = "";
+
+      if (q.emoji) {
+        const emojiDiv = document.createElement("div");
+        emojiDiv.textContent = q.emoji;
+        emojiDiv.style.fontSize = "4rem";
+        emojiDiv.style.margin = "20px";
+        mediaEl.appendChild(emojiDiv);
+      }
+
+      q.answers.forEach((ans, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = ans;
+        btn.classList.add("answer-btn");
+        btn.addEventListener("click", () => selectAnswer(i, btn));
+        answersEl.appendChild(btn);
+      });
+
+      nextBtn.classList.add("hidden");
+      finalMessageEl.textContent = "";
+    }
+
+    function selectAnswer(i, btn) {
+      const correct = questions[currentQ].correct;
+      const buttons = document.querySelectorAll(".answer-btn");
+      buttons.forEach(b => b.disabled = true);
+
+      if (i === correct) {
+        btn.classList.add("correct");
+        good++;
+        scoreGoodEl.textContent = good;
+      } else {
+        btn.classList.add("wrong");
+        bad++;
+        scoreBadEl.textContent = bad;
+        buttons[correct].classList.add("correct");
+      }
+      nextBtn.classList.remove("hidden");
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentQ++;
+      if (currentQ < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function showResults() {
+      titleEl.textContent = "¡Quiz terminado!";
+      mediaEl.innerHTML = "";
+      answersEl.innerHTML = "";
+
+      const total = questions.length;
+      const porcentaje = (good / total) * 100;
+
+      let mensaje = "";
+      if (porcentaje >= 70) mensaje = "🔥 Tremendo friki eres 🔥";
+      else if (porcentaje < 40) mensaje = "😅 Te falta cultura bro";
+      else mensaje = "👌 Nada mal, pero puedes mejorar";
+
+      finalMessageEl.innerHTML = `
+        ${mensaje}
+        <br><br>
+        <img src="https://static0.gamerantimages.com/wordpress/wp-content/uploads/2025/07/lotm.jpg" alt="Imagen final" class="final-img">
+      `;
+
+      nextBtn.style.display = "none";
+    }
+
+    loadQuestion();
+  });
+  </script>
+</body>
+</html>
