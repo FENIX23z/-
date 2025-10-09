@@ -1,0 +1,303 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Word Cup</title>
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+    <header>
+        <h1>Otoño 2025</h1>
+        <p>¡ElAlando sea EL Loco!<br><br>Hecho por marcosplpp</p>
+    </header>
+
+    <div class="container" id="app">
+        <div class="round-banner">
+            <span id="current-round">Ronda 1</span>
+            <div class="progress-container">
+                <label for="pairs-progress">Progreso Turnos:</label>
+                <progress id="pairs-progress" max="100" value="0"></progress>
+                <span id="pairs-text">Turnos: 1 / 3</span>
+            </div>
+            <div class="progress-container">
+                <label for="rounds-progress">Progreso Rondas:</label>
+                <progress id="rounds-progress" max="100" value="0"></progress>
+                <span id="rounds-text">Rondas totales: 1 / 3</span>
+            </div>
+            <span id="videos-remaining">Videos restantes: 6</span>
+        </div>
+        <div id="round-info" class="round-info"></div>
+        <div id="round" class="video-container"></div>
+        <div id="winner" class="winner"></div>
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+    const videos = [
+       "https://www.youtube.com/embed/U1qcMPqzYN4",
+        "https://www.youtube.com/embed/QQ94onekjWE",
+        "https://www.youtube.com/embed/PcmmU4aEQu0",
+        "https://www.youtube.com/embed/el2wyc2gKYk",
+        "https://www.youtube.com/embed/wS-lmrs7h-0",
+        "https://www.youtube.com/embed/NOA0YP51JZo",
+        "https://www.youtube.com/embed/qHXg39FZDoU",
+        "https://www.youtube.com/embed/nbXh4td4byU",
+        "https://www.youtube.com/embed/BgYxct-TACk",
+        "https://www.youtube.com/embed/11CW6yxaU8E",
+        "https://www.youtube.com/embed/FCJ7klVnaq4",
+        "https://www.youtube.com/embed/0WsL3ysqGKQ",
+        "https://www.youtube.com/embed/DSYj9FLVqMY",
+        "https://www.youtube.com/embed/_2Wreo9BrsU",
+        "https://www.youtube.com/embed/VniEEcIswxc",
+	"https://www.youtube.com/embed/GCbdXDZFp-U",
+	"https://www.youtube.com/embed/gSzBX2LXNjw",
+	"https://www.youtube.com/embed/0H1DDYH--Lw",
+        "https://www.youtube.com/embed/spkbC8mqdWk",
+        "https://www.youtube.com/embed/5ALFVv_tdYw",
+        "https://www.youtube.com/embed/dPnLT-txL9k",
+        "https://www.youtube.com/embed/DS_SxUGLs8k",
+        "https://www.youtube.com/embed/wlmn_P8YHr0",
+        "https://www.youtube.com/embed/lcNQ9w5vhFU",
+        "https://www.youtube.com/embed/zaontFJPfbI",
+        "https://www.youtube.com/embed/9MqsPMdLVHM",
+        "https://www.youtube.com/embed/dFOpi6ZSzS4",
+        "https://www.youtube.com/embed/iheljbMWAP8",
+        "https://www.youtube.com/embed/LWeHkXwBEfM",
+        "https://www.youtube.com/embed/lZaZF9V-rG0",
+        "https://www.youtube.com/embed/nzMUyT4Lcfc",
+        "https://www.youtube.com/embed/IYWXJUpttHw",
+        "https://www.youtube.com/embed/a8ZVyJiYpjQ",
+        "https://www.youtube.com/embed/uEk_lA3yczY",
+        "https://www.youtube.com/embed/u08MfluiFTA",
+        "https://www.youtube.com/embed/0Ldw59S5B8c",
+        "https://www.youtube.com/embed/Bn_V31fD-eI",
+        "https://ok.ru/videoembed/10208633228016?nochat=1",
+        "https://ok.ru/videoembed/10208639585008?nochat=1",
+        "https://www.youtube.com/embed/la9NoGyYSBs",
+        "https://www.youtube.com/embed/tbsLIvVM7YM",
+        "https://www.youtube.com/embed/7S6QlyfnSb4",
+        "https://www.youtube.com/embed/AVzRsFMaEm8",
+        "https://www.youtube.com/embed/OpYekcP5jUs",
+        "https://www.youtube.com/embed/rs-oOWEeEUc",
+        "https://www.youtube.com/embed/Uq6ZmHd8mvs",
+        "https://www.youtube.com/embed/Lir9OKfmYAQ",
+        "https://www.youtube.com/embed/zRXYrg6zvCc",
+        "https://www.youtube.com/embed/OIZd_vynwmU",
+        "https://www.youtube.com/embed/X-SOSlnkXAc",
+        "https://www.youtube.com/embed/hCvzUTmxfY4",
+        "https://www.youtube.com/embed/Lnz4i8LErZg",
+        "https://www.youtube.com/embed/gSzBX2LXNjw",
+        "https://www.youtube.com/embed/4wUwWP-WJ7I",
+        "https://www.youtube.com/embed/PwOKS7BiJ50",
+        "https://www.youtube.com/embed/i9yIl98XyHc",
+        "https://www.youtube.com/embed/DpXlprBZMQs",
+        "https://www.youtube.com/embed/7fNDrLOl_nI",
+        "https://www.youtube.com/embed/IogTsI1V_pA",
+        "https://www.youtube.com/embed/G9blq2RvhOo",
+        "https://www.youtube.com/embed/Je4IjQqlD84",
+        "https://www.youtube.com/embed/-MHfE_rpJWA",
+        "https://www.youtube.com/embed/Lnz4i8LErZg",
+        "https://www.youtube.com/embed/eKj5htNLsQU"
+    ];
+
+
+        const app = document.getElementById('app');
+        const roundContainer = document.getElementById('round');
+        const winnerContainer = document.getElementById('winner');
+        const statusContainer = document.getElementById('status');
+        const currentRoundElement = document.getElementById('current-round');
+        const videosRemainingElement = document.getElementById('videos-remaining');
+        const pairsProgressElement = document.getElementById('pairs-progress');
+        const roundsProgressElement = document.getElementById('rounds-progress');
+        const pairsTextElement = document.getElementById('pairs-text');
+        const roundsTextElement = document.getElementById('rounds-text');
+
+        let roundNumber = 1;
+        let totalRounds = Math.ceil(Math.log2(videos.length));
+        let pairsInCurrentRound = 1;
+        let totalPairsInRound = Math.floor(videos.length / 2);
+        const eliminatedVideos = [];
+        const initialVideosCount = videos.length;
+
+        function updateBanner() {
+            currentRoundElement.textContent = `Ronda ${roundNumber}`;
+            videosRemainingElement.textContent = `Videos restantes: ${videos.length}`;
+
+            const pairsProgress = totalPairsInRound > 0 ? (pairsInCurrentRound - 1) / totalPairsInRound * 100 : 100;
+            pairsProgressElement.value = pairsProgress;
+            pairsTextElement.textContent = `Turnos: ${pairsInCurrentRound} / ${totalPairsInRound}`;
+
+            const roundsProgress = (roundNumber - 1) / totalRounds * 100;
+            roundsProgressElement.value = roundsProgress;
+            roundsTextElement.textContent = `Rondas totales: ${roundNumber} / ${totalRounds}`;
+
+            if (videos.length === 1) {
+                pairsProgressElement.value = 100;
+                roundsProgressElement.value = 100;
+                pairsTextElement.textContent = `Turnos: Completado`;
+                roundsTextElement.textContent = `Rondas: Completado`;
+            }
+        }
+
+        function launchConfeti() {
+            const canvas = document.createElement('canvas');
+            canvas.id = 'confetti-canvas';
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.pointerEvents = 'none';
+            document.body.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const confettiPieces = [];
+            const colors = ['#FF4500', '#FFA500', '#FFD700', '#FFFFFF'];
+
+            for (let i = 0; i < 100; i++) {
+                confettiPieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 10 + 5,
+                    speed: Math.random() * 3 + 2,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotationSpeed: Math.random() * 5 - 2.5
+                });
+            }
+
+            function animateConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                confettiPieces.forEach((piece, index) => {
+                    piece.y += piece.speed;
+                    piece.rotation += piece.rotationSpeed;
+
+                    ctx.save();
+                    ctx.translate(piece.x, piece.y);
+                    ctx.rotate(piece.rotation * Math.PI / 180);
+                    ctx.fillStyle = piece.color;
+                    ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size);
+                    ctx.restore();
+
+                    if (piece.y > canvas.height) {
+                        confettiPieces[index].y = -piece.size;
+                        confettiPieces[index].x = Math.random() * canvas.width;
+                    }
+                });
+                requestAnimationFrame(animateConfetti);
+            }
+
+            animateConfetti();
+            setTimeout(() => canvas.remove(), 5000);
+        }
+
+        function renderRound() {
+            roundContainer.innerHTML = '';
+            winnerContainer.innerHTML = '';
+
+            if (videos.length === 1) {
+                winnerContainer.innerHTML = `
+                    <div class="winner-announcement">
+                        <h2 class="winner-title">¡GANADOR DEL TORNEO!</h2>
+                        <div class="winner-video">
+                            <iframe src="${videos[0]}" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                `;
+                currentRoundElement.textContent = `¡Finalizado!`;
+                videosRemainingElement.textContent = `Ganador del torneo.`;
+                statusContainer.textContent = `Videos eliminados: ${eliminatedVideos.length}. Videos restantes: 1.`;
+                launchConfeti();
+                updateBanner();
+                return;
+            }
+
+            const [video1, video2] = videos.splice(0, 2);
+
+            const container1 = document.createElement('div');
+            container1.className = 'video-item';
+            container1.innerHTML = `
+                <iframe src="${video1}" allowfullscreen onmouseover="this.muted=false" onmouseout="this.muted=true"></iframe>
+                <ul>
+                    <center><li><span class="select-btn" onclick="selectVideo('${video1}', '${video2}')">Seleccionar este</span></li></center>
+                </ul>
+            `;
+
+            const container2 = document.createElement('div');
+            container2.className = 'video-item';
+            container2.innerHTML = `
+                <iframe src="${video2}" allowfullscreen onmouseover="this.muted=false" onmouseout="this.muted=true"></iframe>
+                <ul>
+                    <center><li><span class="select-btn" onclick="selectVideo('${video2}', '${video1}')">Seleccionar este</span></li></center>
+                </ul>
+            `;
+
+            roundContainer.appendChild(container1);
+            roundContainer.appendChild(container2);
+        }
+
+        function selectVideo(selected, eliminated) {
+            videos.push(selected);
+            eliminatedVideos.push(eliminated);
+            pairsInCurrentRound++;
+
+            if (pairsInCurrentRound > totalPairsInRound) {
+                roundNumber++;
+                pairsInCurrentRound = 1;
+                totalPairsInRound = Math.floor(videos.length / 2);
+            }
+
+            updateBanner();
+            renderRound();
+        }
+
+        updateBanner();
+        renderRound();
+    </script>
+    <a href="../index.html" class="circle-btn"></a>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9385c5281e8cbfec',t:'MTc0NjAwMjgwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>
