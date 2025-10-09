@@ -6,32 +6,36 @@ let totalSlides = 0;
 function updateSlider(transition = true) {
     const slider = document.querySelector('.slider');
     const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
     totalSlides = slides.length;
 
     // Ajustar para bucle infinito
     if (currentSlide >= totalSlides) {
         currentSlide = 0;
-        slider.style.transition = 'none';
-        slider.style.transform = `translateX(0%)`;
-        setTimeout(() => {
-            slider.style.transition = 'transform 0.5s ease-in-out';
-            updateSlider();
-        }, 50);
-        return;
     } else if (currentSlide < 0) {
         currentSlide = totalSlides - 1;
     }
 
+    // Actualizar el slider con animación suave
     if (transition) {
-        slider.style.transition = 'transform 0.5s ease-in-out';
+        slider.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+    } else {
+        slider.style.transition = 'none';
     }
+    
     slider.style.transform = `translateX(${-currentSlide * 100}%)`;
 
-    // Actualizar puntos
-    const dots = document.querySelectorAll('.dot');
+    // Actualizar los indicadores
     dots.forEach((dot, index) => {
         dot.classList.toggle('active', index === currentSlide);
     });
+
+    // Reiniciar la transición después de un cambio
+    if (!transition) {
+        setTimeout(() => {
+            slider.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+        }, 50);
+    }
 }
 
 function moveSlide(direction) {
