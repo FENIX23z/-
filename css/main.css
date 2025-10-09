@@ -1,0 +1,483 @@
+/* ================================
+🎨 Variables Globales
+================================ */
+:root {
+--bg-dark: #121212;
+--bg-card: #1E1E1E;
+--orange: #FFA500;
+--orange-dark: #FF8C00;
+--red: #FF4500;
+--red-light: #FF6347;
+--gold: #FFD700;
+--gray: #333;
+--white: #FFFFFF;
+}
+
+/* ================================
+🌍 Estilo global
+================================ */
+body {
+background-color: var(--bg-dark);
+color: var(--orange);
+font-family: Arial, sans-serif;
+margin: 0;
+padding: 0;
+text-align: center;
+}
+
+/* ================================
+🔝 Header
+================================ */
+header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+background-color: var(--bg-card);
+padding: 20px;
+flex-wrap: wrap;
+gap: 10px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+header .logo img {
+max-height: 50px;
+max-width: 100px;
+height: auto;
+}
+
+header .creator {
+color: var(--orange-dark);
+font-size: 18px;
+font-weight: bold;
+}
+
+h1, h2 {
+color: var(--orange-dark);
+}
+
+/* ================================
+📦 Contenedores
+================================ */
+.container {
+margin: 20px auto;
+padding: 20px;
+max-width: 1200px;
+background: var(--bg-card);
+border-radius: 10px;
+box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
+}
+
+/* Estilos para el contenedor de batalla */
+.video-container {
+display: flex;
+justify-content: space-around;
+flex-direction: row;
+align-items: center;
+gap: 20px;
+margin: 20px 0;
+flex-wrap: wrap;
+}
+
+/* Estilos para las imágenes en el duelo */
+.video-container img {
+max-width: 45%;
+height: auto;
+border-radius: 8px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+transition: transform 0.3s ease;
+object-fit: cover;
+}
+
+.video-container img:hover {
+transform: scale(1.05);
+cursor: pointer;
+}
+
+/* Última votación */
+.last-vote {
+background-color: var(--bg-card);
+margin: 20px;
+padding: 20px;
+border-radius: 8px;
+box-shadow: 0 4px 8px rgba(255, 140, 0, 0.3);
+}
+
+.last-vote h2 {
+margin-bottom: 10px;
+}
+
+.last-vote p {
+color: var(--red-light);
+}
+
+/* ================================
+🎞️ Carrusel (Index)
+================================ */
+.slider-container {
+position: relative;
+width: 80%;
+max-width: 600px;
+margin: auto;
+overflow: hidden;
+}
+
+.slider {
+display: flex;
+transition: transform 0.5s ease-in-out;
+will-change: transform;
+}
+
+.slide {
+min-width: 100%;
+}
+
+.slide img {
+width: 100%;
+border-radius: 8px;
+object-fit: cover;
+transition: transform 0.3s ease;
+}
+.slide img:hover {
+transform: scale(1.02);
+}
+
+/* Botones del slider */
+button {
+position: absolute;
+top: 50%;
+transform: translateY(-50%);
+background-color: rgba(0, 0, 0, 0.5);
+color: var(--white);
+border: none;
+padding: 10px;
+cursor: pointer;
+font-size: 20px;
+border-radius: 5px;
+transition: all 0.3s ease;
+}
+button:hover {
+background-color: rgba(255, 140, 0, 0.8);
+transform: scale(1.1) translateY(-50%);
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
+
+/* Indicadores */
+.dots {
+margin-top: 10px;
+display: flex;
+justify-content: center;
+gap: 8px;
+}
+.dot {
+width: 10px;
+height: 10px;
+background-color: var(--orange);
+border-radius: 50%;
+cursor: pointer;
+opacity: 0.5;
+transition: transform 0.3s, opacity 0.3s;
+}
+.dot.active {
+opacity: 1;
+transform: scale(1.2);
+}
+
+/* Indicador de pausa */
+.pause-indicator {
+position: absolute;
+top: 10px;
+right: 10px;
+color: var(--red);
+font-size: 14px;
+background: rgba(0, 0, 0, 0.7);
+padding: 5px 10px;
+border-radius: 5px;
+opacity: 0;
+transition: opacity 0.3s;
+}
+
+/* ================================
+🏆 Banner Rondas (Torneos)
+================================ */
+.round-banner {
+background-color: #222;
+padding: 10px;
+border-radius: 8px;
+margin-bottom: 20px;
+font-weight: bold;
+display: flex;
+justify-content: space-between;
+gap: 20px;
+align-items: center;
+flex-wrap: wrap;
+border: 2px solid var(--orange);
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+.round-banner span {
+margin: 0 10px;
+color: var(--orange);
+}
+
+/* ================================
+🎥 Videos
+================================ */
+/* Portada */
+.video-container.portada {
+display: flex;
+flex-direction: row;
+justify-content: center;
+gap: 15px;
+align-items: center;
+flex-wrap: wrap;
+}
+
+/* Torneo → siempre 2 contendientes lado a lado */
+.video-container.torneo {
+display: flex;
+justify-content: center;
+gap: 15px;
+flex-wrap: wrap;
+}
+
+.video-item {
+background: var(--gray);
+padding: 10px;
+border-radius: 8px;
+box-shadow: 0 2px 5px rgba(255, 140, 0, 0.5);
+}
+.video-item.torneo {
+flex: 0 0 48%;
+max-width: 48%;
+}
+.video-item.duelo {
+flex: 0 0 48%;
+max-width: 48%;
+}
+
+iframe {
+width: 100%;
+aspect-ratio: 16/9;
+border: none;
+border-radius: 8px;
+}
+
+/* ================================
+🔘 Botones de selección
+================================ */
+ul { padding: 0; list-style-type: none; }
+li {
+font-size: 22px;
+width: 8em;
+height: 2em;
+color: var(--orange);
+border-left: 0.08em solid;
+position: relative;
+margin: 0.8em auto;
+cursor: pointer;
+}
+li span {
+position: relative;
+height: 120%;
+width: 100%;
+top: -10%;
+border: 0.08em solid;
+background-color: var(--gray);
+display: flex;
+align-items: center;
+justify-content: center;
+text-transform: capitalize;
+transform: translateX(calc(-0.15em * 3 - 0.08em * 2));
+transition: 0.3s;
+}
+li:hover span {
+transform: translateX(0.15em);
+background: var(--red-light);
+color: var(--white);
+}
+
+/* ================================
+🔘 Botón circular fijo
+================================ */
+.circle-btn {
+position: fixed;
+bottom: 20px;
+right: 20px;
+width: 50px;
+height: 50px;
+background-color: var(--red);
+border-radius: 50%;
+background-image: url('[https://cdn-icons-png.flaticon.com/512/2484/2484004.png](https://cdn-icons-png.flaticon.com/512/2484/2484004.png)') !important;
+background-size: cover;
+background-position: center;
+text-decoration: none;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+transition: all 0.3s ease;
+}
+.circle-btn:hover {
+background-color: var(--red-light);
+box-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+transform: scale(1.1);
+}
+
+/* ================================
+▶️ Botón Jugar
+================================ */
+.play-now-button {
+display: inline-block;
+background-color: var(--red);
+color: var(--white);
+text-decoration: none;
+font-size: 18px;
+padding: 12px 20px;
+border-radius: 5px;
+width: 66%;
+max-width: 250px;
+margin: 20px auto;
+transition: all 0.3s ease;
+}
+.play-now-button:hover {
+background-color: var(--red-light);
+transform: scale(1.05);
+}
+
+/* ================================
+🏅 Ganador
+================================ */
+.winner-announcement {
+text-align: center;
+padding: 20px;
+min-height: 300px;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+background: var(--bg-dark);
+}
+.winner-title {
+font-size: 36px;
+color: var(--red);
+text-transform: uppercase;
+margin-bottom: 20px;
+text-shadow: 0 0 10px rgba(255, 69, 0, 0.8);
+}
+.winner-score {
+color: var(--orange);
+font-size: 22px;
+}
+.winner-video iframe {
+width: 90vw;
+height: auto;
+max-width: 1200px;
+border: none;
+border-radius: 10px;
+box-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+background: var(--white);
+}
+
+/* ================================
+📊 Barras de progreso
+================================ */
+.progress-container {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 5px;
+}
+.progress-container label,
+.progress-container span {
+font-size: 14px;
+color: var(--orange);
+}
+progress {
+width: 150px;
+height: 15px;
+border: 1px solid var(--bg-dark);
+background: var(--bg-dark);
+border-radius: 5px;
+-webkit-appearance: none;
+appearance: none;
+overflow: hidden;
+}
+progress::-webkit-progress-bar {
+background: var(--bg-dark);
+border-radius: 5px;
+}
+progress::-webkit-progress-value {
+background: var(--red);
+border-radius: 5px;
+transition: width 0.5s ease-in-out;
+}
+progress::-moz-progress-bar {
+background: var(--red);
+border-radius: 5px;
+transition: width 0.5s ease-in-out;
+}
+
+/* ================================
+📱 Responsividad
+================================ */
+@media (max-width: 768px) {
+.slider-container { width: 90%; }
+button { padding: 8px; font-size: 16px; }
+.video-item.torneo,
+.video-item.duelo {
+flex: 1 1 100%;
+max-width: 100%;
+}
+}
+
+/* 🔧 FIX para torneos (Primavera 2025 y similares) */
+#round.video-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+#round.video-container .video-item {
+  flex: 0 0 48%;
+  max-width: 48%;
+}
+
+
+/* 🔧 FIX botón circular */
+.circle-btn {
+  display: block;
+  background: var(--red) url('https://cdn-icons-png.flaticon.com/512/2484/2484004.png') center/cover no-repeat !important;
+}
+
+/* 🔧 FIX definitivo para torneos: 2 videos lado a lado */
+#round.video-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  gap: 20px !important;
+  flex-wrap: nowrap !important; /* 🔹 Fuerza en una sola fila */
+}
+
+#round.video-container .video-item {
+  flex: 0 0 48% !important;   /* 🔹 Ocupa la mitad */
+  max-width: 48% !important;
+}
+
+#round.video-container .video-item iframe {
+  width: 100% !important;
+  height: 55vh !important;   /* 🔹 Altura equilibrada */
+  object-fit: contain !important;
+}
+
+/* 📱 En móviles se apilan */
+@media (max-width: 768px) {
+  #round.video-container {
+    flex-wrap: wrap !important;
+  }
+  #round.video-container .video-item {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+  }
+  #round.video-container .video-item iframe {
+    height: 35vh !important;
+  }
+}

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Anime por Emojis</title>
+  <style>
+    body { background:#121212; color:#FFA500; font-family:Arial, sans-serif; text-align:center; margin:0; }
+    header { background:#1E1E1E; padding:15px; display:flex; justify-content:space-between; align-items:center; }
+    header img { max-height:50px; }
+    .quiz-container { margin:30px auto; max-width:600px; background:#1E1E1E; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(255,140,0,0.3); }
+    #media-container { margin:15px 0; font-size:3rem; }
+    .answer-btn { display:block; width:80%; margin:10px auto; padding:12px; background:#333; border:2px solid #FFA500; color:#FFA500; border-radius:8px; cursor:pointer; font-size:18px; transition:0.3s; }
+    .answer-btn:hover { background:#444; }
+    .answer-btn.correct { background:#2e7d32; color:white; }
+    .answer-btn.wrong { background:#c62828; color:white; }
+    #next-btn { margin-top:20px; padding:10px 15px; font-size:16px; background:#FF4500; color:white; border:none; border-radius:5px; cursor:pointer; }
+    #next-btn.hidden { display:none; }
+    .score-board { margin-top:15px; font-size:18px; color:#FFA500; }
+    .final-message { margin-top:20px; font-size:22px; font-weight:bold; color:#FF6347; }
+    .final-img { margin-top:30px; max-width:80%; border-radius:10px; }
+    .circle-btn { position:fixed; bottom:20px; right:20px; width:50px; height:50px; background:#FF4500 url('https://cdn-icons-png.flaticon.com/512/2484/2484004.png') center/cover no-repeat; border-radius:50%; box-shadow:0 4px 8px rgba(0,0,0,0.2); }
+    .circle-btn:hover { background-color:#FF6347; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="https://fenix23z.github.io/-/img/animecup.png" alt="Anime Cup Logo">
+    </div>
+    <div class="creator">Adivina el Anime por Emojis 🎭</div>
+  </header>
+  <a href="https://fenix23z.github.io/-/" class="circle-btn"></a>
+
+  <main class="quiz-container">
+    <h2 id="question-title">Pregunta</h2>
+    <div id="media-container"></div>
+    <div id="answers"></div>
+    <button id="next-btn" class="hidden">Siguiente</button>
+    <div class="score-board">
+      ✅ Correctas: <span id="score-good">0</span> | ❌ Incorrectas: <span id="score-bad">0</span>
+    </div>
+    <div id="final-message" class="final-message"></div>
+  </main>
+
+  <!-- Preguntas -->
+  <script type="application/json" id="quiz-data">
+  [
+  {"title":"¿Qué anime es?","emoji":"🎀🔞👼","answers":["2.5-jigen no Ririsa","Sono Bisque Doll wa Koi wo Suru","Kiss x Sis","Kaguya-sama: Love is War"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🔫🐲🐰🧛🏻‍♀️","answers":["Arifureta","Overlord","GATE","Seraph of the End"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🧱","answers":["Attack on Titan","Kabaneri of the Iron Fortress","Kaijuu 8-gou","Vinland Saga"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🍀","answers":["Black Clover","Fairy Tail","Blue Exorcist","Magi: The Labyrinth of Magic"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🎸😰","answers":["Bocchi the Rock!","K-On!","Nana","Your Lie in April"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"❄️🔥","answers":["Boku no Hero Academia","Fire Force","Nana","Black Clover"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🍥💩","answers":["Boruto","Naruto","Gintama","One Piece"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🐷👊🏻","answers":["Busamen Gachi Fighter","Sakamoto Days","Kengan Ashura","Baki"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🪚","answers":["Chainsaw Man","Devilman Crybaby","Tokyo Ghoul","Dorohedoro"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"💍🏫🎒","answers":["Class no Daikirai na Joshi to Kekkon","Kaguya-sama: Love is War","Horimiya","100-nin no Kanojo"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🏫🧠","answers":["Classroom of the Elite","Assassination Classroom","Kaguya-sama: Love is War","The Disastrous Life of Saiki K."],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🐺👑🦴","answers":["Clevatess","Overlord","Beastars","JoJo's Bizarre Adventure"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🌆🤖","answers":["Cyberpunk: Edgerunners","Akira","Psycho-Pass","Ghost in the Shell"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👻👽","answers":["Dandadan","Noragami","Parasyte","Mob Psycho 100"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"📓☠️","answers":["Death Note","Code Geass","Future Diary","Erased"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🧪⚡","answers":["Dr. Stone","Steins;Gate","Fullmetal Alchemist: Brotherhood","No Game No Life"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🐉⚡","answers":["Dragon Ball Z","One Piece","Naruto","Bleach"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🍳🐲","answers":["Dungeon Meshi","Made in Abyss","Toriko","Is It Wrong to Try to Pick Up Girls in a Dungeon?"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🔥🚒","answers":["Fire Force","Black Clover","Blue Exorcist","Seraph of the End"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🐉🧙‍♂️","answers":["Fairy Tail","Black Clover","Magi: The Labyrinth of Magic","Konosuba"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"⚔️✨","answers":["Fate/stay night: Unlimited Blade Works","Sword Art Online","Re:Zero","Kara no Kyoukai"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👹⚔️","answers":["Goblin Slayer","Berserk","Claymore","Vinland Saga"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🌊⚔️","answers":["Kimetsu no Yaiba","Bleach","Jujutsu Kaisen","Dororo"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🎩🧐","answers":["Lord of the Mysteries","Monster","Mushishi","The Promised Neverland"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"💩","answers":["Horimiya","Kaguya-sama: Love is War","Tomochan wa Onnanoko!","Sono Bisque Doll"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"♟️✖️","answers":["Hunter x Hunter","No Game No Life","Death Note","Code Geass"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🧓🏻🎮","answers":["Isekai Ojisan","Log Horizon","Konosuba","Overlord"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🌍⚔️🌍","answers":["Isekai Quartet","Konosuba","That Time I Got Reincarnated as a Slime","Re:Zero"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"💪","answers":["JoJo's","One Punch Man","Mob Psycho 100","Kengan Ashura"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👊👹","answers":["Jujutsu Kaisen","Demon Slayer (Kimetsu no Yaiba)","Bleach","Chainsaw Man"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🕴🏻","answers":["Kage no Jitsuryokusha ni Naritakute!","Spy x Family","Death Note","Psycho-Pass"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"❤️🧠","answers":["Kaguya-sama: Love is War","Horimiya","Toradora!","My Teen Romantic Comedy SNAFU"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🔵🐉","answers":["Kaijuu 8-gou","Attack on Titan","Gurren Lagann","Knights of Sidonia"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🕵️🕔⬅️👧🧣","answers":["Erased","Bleach","Dororo","Nausicaä of the Valley of the Wind"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"❤️❤️","answers":["100 Kanojo","Kaguya-sama: Love is War","Sono Bisque Doll","Horimiya"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🩲","answers":["Konosuba","Love, Chunibyo & Other Delusions","Prison School","How Not to Summon a Demon Lord"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"⚗️👑","answers":["Kusuriya no Hitorigoto","Dr. Stone","The Apothecary Diaries","Mushishi"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🤖","answers":["Made in Abyss","Blame!","Knights of Sidonia","Psycho-Pass"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🍋‍🟩","answers":["Make Heroine ga Oosugiru!","My Teen Romantic Comedy SNAFU","Kaguya-sama: Love is War","Sono Bisque Doll"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"💪📚","answers":["Mashle","One Punch Man","Mob Psycho 100","My Hero Academia"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👩‍👩‍👧","answers":["Mikadono Sanshimai","Hinako Note","A Sister's All You Need","Lovely★Complex"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👦🔮","answers":["Mob Psycho 100","The Disastrous Life of Saiki K.","One Punch Man","Charlotte"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👶🗡️","answers":["Mushoku Tensei","Made in Abyss","That Time I Got Reincarnated as a Slime","Grimgar of Fantasy and Ash"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🥷","answers":["Naruto","Boruto","Basilisk","Dororo"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🏯⚔️","answers":["Nige Jouzu no Wakagimi","Vinland Saga","Rurouni Kenshin","Sengoku Basara"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🎲👑","answers":["No Game No Life","Log Horizon","Sword Art Online","Overlord"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"⛩️👻","answers":["Noragami","Natsume's Book of Friends","Bleach","Yu Yu Hakusho"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👊","answers":["One Punch Man","Mob Psycho 100","Naruto","Kengan Ashura"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🗡️⚔️","answers":["Solo Leveling","The Rising of the Shield Hero","Sword Art Online","Overlord"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👑🤴","answers":["Ousama Ranking","Vinland Saga","Magi: The Labyrinth of Magic","Fate/Zero"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"💀👑","answers":["Overlord","Lord of the Mysteries","Black Butler","Re:Zero"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"⚡🐭","answers":["Pokémon","Doraemon","Digimon","Yo-Kai Watch"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🥋🐼","answers":["Ranma ½","Inuyasha","Kenichi: The Mightiest Disciple","Naruto"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"⏳👧","answers":["Re:Zero","Steins;Gate","The Promised Neverland","Made in Abyss"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"⚔️🌎","answers":["Record of Ragnarok","Fist of the North Star","Vinland Saga","Berserk"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👓🔫","answers":["Sakamoto Days","Great Pretender","Banana Fish","Cowboy Bebop"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🎮🐦","answers":["Shangri-La Frontier","No Game No Life","Log Horizon","Summer Wars"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🔞😂","answers":["SHIMONETA","Prison School","Grand Blue","Prison School (comedy/ecchi)"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🪡","answers":["Sono Bisque Doll wa Koi wo Suru","Kaguya-sama: Love is War","Futari wa Pretty Cure","Tomochan wa Onnanoko!"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🧝🏻‍♀️","answers":["Sousou no Frieren","Sword Art Online","That Time I Got Reincarnated as a Slime","The Ancient Magus' Bride"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🕵️","answers":["Spy x Family","Case Closed (Detective Conan)","Erased","Psycho-Pass"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"⚔️🎮","answers":["Sword Art Online","Log Horizon","Overlord","No Game No Life"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🐙","answers":["Takopii no Genzai","Dorohedoro","Gintama","One Piece"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🛡️","answers":["Tate no Yuusha","The Rising of the Shield Hero","Overlord","That Time I Got Reincarnated as a Slime"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👑📖","answers":["Tensei shitara Dainana Ouji Datta node","Mushoku Tensei","Re:Zero","The Eminence in Shadow"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🐉","answers":["Tensei shitara Slime Datta Ken","That Time I Got Reincarnated as a Slime","Dragon Ball Z","Fairy Tail"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🚪🍽️","answers":["The Promised Neverland","Made in Abyss","From the New World","Parasyte"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"😈","answers":["The Seven Deadly Sins","Blue Exorcist","Black Clover","D.Gray-man"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"☕","answers":["Tokyo Ghoul","Durarara!!","K-On!","Barakamon"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👊","answers":["Tomochan wa Onnanoko!","Kaguya-sama: Love is War","Horimiya","Komi Can't Communicate"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🦸‍♂️","answers":["to be hero x","One Punch Man","My Hero Academia","Tiger & Bunny"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"✖️","answers":["Vinland Saga","Attack on Titan","Record of Ragnarok","Berserk"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"💨","answers":["Wind Breaker","Yowamushi Pedal","Initial D","Kaze ga Tsuyoku Fuiteiru"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"🎶","answers":["Yofukashi no Uta","Given","Nana","Your Lie in April"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"📚🖌️","answers":["Zenshuu","Manga no Tenshi","Bakuman","Blue Period"],"correct":0},
+  {"title":"¿Qué anime es?","emoji":"👶","answers":["Oshi no Ko","Amaama to Inazuma","Usagi Drop","Karakai Jouzu no Takagi-san"],"correct":0}
+]
+
+  </script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const questions = JSON.parse(document.getElementById("quiz-data").textContent);
+    let currentQ = 0, good = 0, bad = 0;
+
+    const titleEl = document.getElementById("question-title");
+    const mediaEl = document.getElementById("media-container");
+    const answersEl = document.getElementById("answers");
+    const nextBtn = document.getElementById("next-btn");
+    const scoreGoodEl = document.getElementById("score-good");
+    const scoreBadEl = document.getElementById("score-bad");
+    const finalMessageEl = document.getElementById("final-message");
+
+    // Función para barajar un array
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function loadQuestion() {
+      let q = JSON.parse(JSON.stringify(questions[currentQ])); // copia profunda
+      titleEl.textContent = q.title;
+
+      mediaEl.textContent = q.emoji;
+      answersEl.innerHTML = "";
+
+      // Crear pares respuesta / esCorrecta
+      let answerPairs = q.answers.map((ans, i) => ({
+        text: ans,
+        correct: i === q.correct
+      }));
+
+      // Barajar respuestas
+      shuffleArray(answerPairs);
+
+      // Crear botones
+      answerPairs.forEach(ap => {
+        const btn = document.createElement("button");
+        btn.textContent = ap.text;
+        btn.classList.add("answer-btn");
+        btn.addEventListener("click", () => selectAnswer(ap.correct, btn));
+        answersEl.appendChild(btn);
+      });
+
+      nextBtn.classList.add("hidden");
+      finalMessageEl.textContent = "";
+    }
+
+    function selectAnswer(correct, btn) {
+      const buttons = document.querySelectorAll(".answer-btn");
+      buttons.forEach(b => b.disabled = true);
+
+      if (correct) {
+        btn.classList.add("correct");
+        good++;
+        scoreGoodEl.textContent = good;
+      } else {
+        btn.classList.add("wrong");
+        bad++;
+        scoreBadEl.textContent = bad;
+        buttons.forEach(b => {
+          if (b.textContent === questions[currentQ].answers[questions[currentQ].correct]) {
+            b.classList.add("correct");
+          }
+        });
+      }
+      nextBtn.classList.remove("hidden");
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentQ++;
+      if (currentQ < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function showResults() {
+      titleEl.textContent = "¡Quiz terminado!";
+      mediaEl.textContent = "";
+      answersEl.innerHTML = "";
+
+      const total = questions.length;
+      const porcentaje = (good / total) * 100;
+
+      let mensaje = "";
+      if (porcentaje >= 70) mensaje = "🔥 Tremendo friki eres 🔥";
+      else if (porcentaje < 40) mensaje = "😅 Te falta cultura bro";
+      else mensaje = "👌 Nada mal, pero puedes mejorar";
+
+      finalMessageEl.innerHTML = `
+        ${mensaje}
+        <br><br>
+        <img src="https://i.imgur.com/Cz0Z8sK.jpeg" alt="Imagen final" class="final-img">
+      `;
+
+      nextBtn.style.display = "none";
+    }
+
+    loadQuestion();
+  });
+  </script>
+</body>
+</html>
+
+
+

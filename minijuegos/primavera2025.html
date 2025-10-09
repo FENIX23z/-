@@ -1,0 +1,302 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Word Cup</title>
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+    <header>
+        <h1>Primavera 2025</h1>
+        <p>Dependiendo del navegador hay OP/ED que no se pueden ver en ese caso presiona en ver en YouTube<br><br>Hecho por marcosplpp</p>
+    </header>
+
+    <div class="container" id="app">
+        <div class="round-banner">
+            <span id="current-round">Ronda 1</span>
+            <div class="progress-container">
+                <label for="pairs-progress">Progreso Turnos:</label>
+                <progress id="pairs-progress" max="100" value="0"></progress>
+                <span id="pairs-text">Turnos: 1 / 3</span>
+            </div>
+            <div class="progress-container">
+                <label for="rounds-progress">Progreso Rondas:</label>
+                <progress id="rounds-progress" max="100" value="0"></progress>
+                <span id="rounds-text">Rondas totales: 1 / 3</span>
+            </div>
+            <span id="videos-remaining">Videos restantes: 6</span>
+        </div>
+        <div id="round-info" class="round-info"></div>
+        <div id="round" class="video-container"></div>
+        <div id="winner" class="winner"></div>
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+const videos = [
+  "https://www.youtube.com/embed/a_NB6QkfzAM?si=hkTJ8pJNRiMDldYz",
+  "https://www.youtube.com/embed/REuUOArc0W4?si=Ar1M9wFR0GKrcL0G",
+  "https://www.youtube.com/embed/_KxMEcrDgJg?si=myor3Tv6usHNsDbg",
+  "https://www.youtube.com/embed/jQc1EsfHsCg?si=OMYwX-oLsQUum1l7",
+  "https://www.youtube.com/embed/-5w45MRwr08?si=gYQUCezCEWc7xI12",
+  "https://www.youtube.com/embed/XBMrH1ZQs90?si=J5Yg9vgS5OXofZqr",
+  "https://www.youtube.com/embed/mA0pL5Juotc?si=yxyH2B1IJ_i3EwZH",
+  "https://www.youtube.com/embed/aUDgQs0lvRM?si=5sLgg7Qnl1juf3Je",
+  "https://www.youtube.com/embed/u3EDKUM8rUw?si=sT64wvLKfXUwsxQ3",
+  "https://www.youtube.com/embed/W8d_WYTQCQY?si=R7wencVyp2IV1xRI",
+  "https://www.youtube.com/embed/PEP7a_FoIi4?si=MCOmQ4URHe1M298K",
+  "https://www.youtube.com/embed/CyH-q2P0IJs?si=CKpb0r_fyJX9UwwS",
+  "https://www.youtube.com/embed/yv9J-H3CsKA?si=52kwp3LdDIocVPgr",
+  "https://www.youtube.com/embed/sRlX16LN-Dc?si=WDlqVr_DdlsSj0kW",
+  "https://www.youtube.com/embed/5LGyGq_H34A?si=vNVj8PF-HEAeZ1Ct",
+  "https://www.youtube.com/embed/dcxhZTb_6zs?si=0QpiP8NYzfpz7pny",
+  "https://www.youtube.com/embed/AWlUVr7Du04?si=mqFhLJv9QCj0a37g",
+  "https://www.youtube.com/embed/HrRxvh4bkHE?si=10T4ESNrkE_FzjVE",
+  "https://www.youtube.com/embed/-7h--XTyj8A?si=c_SAEMskVaLbm0Pw",
+  "https://www.youtube.com/embed/huKJQ4ShlQU?si=U8NTbjm3Zn55cVLr",
+  "https://www.youtube.com/embed/nv_Ghx0Jk-I?si=DRpQT7_5ojpsaWWO",
+  "https://www.youtube.com/embed/SJqaW0qQgZw?si=M6OBRvW20-iMVdKP",
+  "https://www.youtube.com/embed/VHxeuLf_eRs?si=UnN5zHgtAbSa5CL3",
+  "https://www.youtube.com/embed/X7CUKgkmjek?si=-BcdymV1Yisttm5-",
+  "https://www.youtube.com/embed/WmLqVVnLl80?si=IsRVdJCkwMLYyvNg",
+  "https://www.youtube.com/embed/Tvusi5PSzo0?si=Rq7EZNC9NarUR0rx",
+  "https://www.youtube.com/embed/BxUF9WQQZFI?si=2UQQLYSWS0-570rD",
+  "https://www.youtube.com/embed/Ftw4vkl_V0s?si=Dj0BOLVoGJNfmIVv",
+  "https://www.youtube.com/embed/1-qts35mIkM?si=-DIq8su70SW8jmXD",
+  "https://www.youtube.com/embed/PaXXwyA9aYE?si=fnXDblg5Asn28uRA",
+  "https://www.youtube.com/embed/ySD7YVvd6Xw?si=wvsWOYhkPiafB6G4",
+  "https://www.youtube.com/embed/9se7Hsnbo9I?si=GptUpGmyUdViSjSV",
+  "https://www.youtube.com/embed/-hUpuao8KRQ?si=hGAnjQ-vPKm8vY1W",
+  "https://www.youtube.com/embed/a6WTDZQrbeE?si=yjkItvLP1qfCL1BI",
+  "https://www.youtube.com/embed/woGuV1Wcspg?si=5S3GEj4kBzlbDihW",
+  "https://www.youtube.com/embed/UbwXsefbv6o?si=mlb-zeVv-KPmw2Sg",
+  "https://www.youtube.com/embed/wONjimYg078?si=_yKSf2ilLzZaLiXo",
+  "https://www.youtube.com/embed/MqKDozk20eA?si=mOtCW9TP9ihFp7OE",
+  "https://www.youtube.com/embed/mZ9vzsjGN1Q?si=m1PrOdwgNUxd66vW",
+  "https://www.youtube.com/embed/nJs0rcVwaqw?si=bb3JlLlO-l80pSKk",
+  "https://www.youtube.com/embed/4HzcQhk7Rfc?si=MDZx0u0oO4PQbPVI",
+  "https://www.youtube.com/embed/BR-WPYmXK70?si=96eLCwwUGkAtv0cs",
+  "https://www.youtube.com/embed/IY5mbMwkFeM?si=YzzebFeo3vGMJqVK",
+  "https://www.youtube.com/embed/8QJ8KNdhkiA?si=em-9faiw8JrkLhGv",
+  "https://www.youtube.com/embed/hi6I0ZZhSDY?si=5REO4CG7vdpDPj-B",
+  "https://www.youtube.com/embed/tKGrlxpMFOM?si=p-b6UC7v0lPbpPdu",
+  "https://www.youtube.com/embed/PWxYdRstDW8?si=BBZrERSOY43JIr-3",
+  "https://www.youtube.com/embed/ihJy6p71nuA?si=BJkkRbjDffgFwENM",
+  "https://www.youtube.com/embed/2390XLZujGg?si=kGYI4_D9ZcaRwa6c",
+  "https://www.youtube.com/embed/n5M7y9i-30g?si=U7T8epFnQAv90eBj",
+  "https://www.youtube.com/embed/TGgGPPQmtk4?si=gS0tpCPgK5x_xbe6",
+  "https://www.youtube.com/embed/2ujbjT7k6ak?si=yCDViNLDBM5hNsyL",
+  "https://www.youtube.com/embed/QCcjleklMFs?si=AvZ0nMPGgUbwzkIN",
+  "https://www.youtube.com/embed/O1MrkfY0iWM?si=dSw3sjdnGyFEHjWR",
+  "https://www.youtube.com/embed/GiwnwHM0kxc?si=LNX2gxV3S1h3RlQ6",
+  "https://www.youtube.com/embed/DhUWbErUqlg?si=1IzRyn1WUQfIX3SA",
+  "https://www.youtube.com/embed/J6lHlq9WKqM?si=gB9lqfsriHf88QjX",
+  "https://www.youtube.com/embed/9yphXUZTgoU?si=iuyJ5c2n0FWBiZ1o",
+  "https://www.youtube.com/embed/P4jTLEnAUEs?si=CEx-kXf7niO2TGbY",
+  "https://www.youtube.com/embed/oHs-XfeUjIU?si=Mbg2muwu2WinqGPX",
+  "https://www.youtube.com/embed/BGm8wZ4cDM8?si=h3jR3kTu9NmlTUWB",
+  "https://www.youtube.com/embed/X-M-qv_SoHY?si=_JliP7HIermW18lA",
+  "https://www.youtube.com/embed/B4torQNiIBU?si=hJT8mD015gF_qWgp",
+  "https://www.youtube.com/embed/MifoXdgACMg?si=5k9odP2Q3XjS3JU_"
+];
+
+        const app = document.getElementById('app');
+        const roundContainer = document.getElementById('round');
+        const winnerContainer = document.getElementById('winner');
+        const statusContainer = document.getElementById('status');
+        const currentRoundElement = document.getElementById('current-round');
+        const videosRemainingElement = document.getElementById('videos-remaining');
+        const pairsProgressElement = document.getElementById('pairs-progress');
+        const roundsProgressElement = document.getElementById('rounds-progress');
+        const pairsTextElement = document.getElementById('pairs-text');
+        const roundsTextElement = document.getElementById('rounds-text');
+
+        let roundNumber = 1;
+        let totalRounds = Math.ceil(Math.log2(videos.length));
+        let pairsInCurrentRound = 1;
+        let totalPairsInRound = Math.floor(videos.length / 2);
+        const eliminatedVideos = [];
+        const initialVideosCount = videos.length;
+
+        function updateBanner() {
+            currentRoundElement.textContent = `Ronda ${roundNumber}`;
+            videosRemainingElement.textContent = `Videos restantes: ${videos.length}`;
+
+            const pairsProgress = totalPairsInRound > 0 ? (pairsInCurrentRound - 1) / totalPairsInRound * 100 : 100;
+            pairsProgressElement.value = pairsProgress;
+            pairsTextElement.textContent = `Turnos: ${pairsInCurrentRound} / ${totalPairsInRound}`;
+
+            const roundsProgress = (roundNumber - 1) / totalRounds * 100;
+            roundsProgressElement.value = roundsProgress;
+            roundsTextElement.textContent = `Rondas totales: ${roundNumber} / ${totalRounds}`;
+
+            if (videos.length === 1) {
+                pairsProgressElement.value = 100;
+                roundsProgressElement.value = 100;
+                pairsTextElement.textContent = `Turnos: Completado`;
+                roundsTextElement.textContent = `Rondas: Completado`;
+            }
+        }
+
+        function launchConfeti() {
+            const canvas = document.createElement('canvas');
+            canvas.id = 'confetti-canvas';
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.pointerEvents = 'none';
+            document.body.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const confettiPieces = [];
+            const colors = ['#FF4500', '#FFA500', '#FFD700', '#FFFFFF'];
+
+            for (let i = 0; i < 100; i++) {
+                confettiPieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 10 + 5,
+                    speed: Math.random() * 3 + 2,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotationSpeed: Math.random() * 5 - 2.5
+                });
+            }
+
+            function animateConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                confettiPieces.forEach((piece, index) => {
+                    piece.y += piece.speed;
+                    piece.rotation += piece.rotationSpeed;
+
+                    ctx.save();
+                    ctx.translate(piece.x, piece.y);
+                    ctx.rotate(piece.rotation * Math.PI / 180);
+                    ctx.fillStyle = piece.color;
+                    ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size);
+                    ctx.restore();
+
+                    if (piece.y > canvas.height) {
+                        confettiPieces[index].y = -piece.size;
+                        confettiPieces[index].x = Math.random() * canvas.width;
+                    }
+                });
+                requestAnimationFrame(animateConfetti);
+            }
+
+            animateConfetti();
+            setTimeout(() => canvas.remove(), 5000);
+        }
+
+        function renderRound() {
+            roundContainer.innerHTML = '';
+            winnerContainer.innerHTML = '';
+
+            if (videos.length === 1) {
+                winnerContainer.innerHTML = `
+                    <div class="winner-announcement">
+                        <h2 class="winner-title">¡GANADOR DEL TORNEO!</h2>
+                        <div class="winner-video">
+                            <iframe src="${videos[0]}" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                `;
+                currentRoundElement.textContent = `¡Finalizado!`;
+                videosRemainingElement.textContent = `Ganador del torneo.`;
+                statusContainer.textContent = `Videos eliminados: ${eliminatedVideos.length}. Videos restantes: 1.`;
+                launchConfeti();
+                updateBanner();
+                return;
+            }
+
+            const [video1, video2] = videos.splice(0, 2);
+
+            const container1 = document.createElement('div');
+            container1.className = 'video-item';
+            container1.innerHTML = `
+                <iframe src="${video1}" allowfullscreen onmouseover="this.muted=false" onmouseout="this.muted=true"></iframe>
+                <ul>
+                    <center><li><span class="select-btn" onclick="selectVideo('${video1}', '${video2}')">Seleccionar este</span></li></center>
+                </ul>
+            `;
+
+            const container2 = document.createElement('div');
+            container2.className = 'video-item';
+            container2.innerHTML = `
+                <iframe src="${video2}" allowfullscreen onmouseover="this.muted=false" onmouseout="this.muted=true"></iframe>
+                <ul>
+                    <center><li><span class="select-btn" onclick="selectVideo('${video2}', '${video1}')">Seleccionar este</span></li></center>
+                </ul>
+            `;
+
+            roundContainer.appendChild(container1);
+            roundContainer.appendChild(container2);
+        }
+
+        function selectVideo(selected, eliminated) {
+            videos.push(selected);
+            eliminatedVideos.push(eliminated);
+            pairsInCurrentRound++;
+
+            if (pairsInCurrentRound > totalPairsInRound) {
+                roundNumber++;
+                pairsInCurrentRound = 1;
+                totalPairsInRound = Math.floor(videos.length / 2);
+            }
+
+            updateBanner();
+            renderRound();
+        }
+
+        updateBanner();
+        renderRound();
+    </script>
+    <a href="../index.html" class="circle-btn"></a>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9385c5266d0dbf6b',t:'MTc0NjAwMjgwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>
