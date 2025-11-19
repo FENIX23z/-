@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Luiskis Combat: Los Puteros</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: url('./detra.png') center/cover no-repeat fixed;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Impact', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+        
+        #game-container {
+            position: relative;
+            display: inline-block;
+            border: 4px solid #444;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            width: 1280px; 
+            height: 720px;
+            background: url('./fondo.gif') center/cover no-repeat; 
+            background-size: cover;
+            background-position: center;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: transparent; 
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            display: none;
+            align-items: flex-start;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .stats-wrapper {
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .health-bar-container {
+            position: relative;
+            height: 30px;
+            width: 100%;
+            background-color: #333;
+            border: 2px solid #fff;
+            margin-bottom: 5px;
+            overflow: hidden;
+        }
+        
+        /* Barra de Bloqueo (Stamina) */
+        .block-bar-container {
+            position: relative;
+            height: 10px;
+            width: 100%; 
+            background-color: #222;
+            border: 1px solid #888;
+            display: none; 
+            overflow: hidden;
+        }
+
+        .stamina-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #00ffff, #0088ff);
+            transition: width 0.1s;
+        }
+        /* J2 Stamina */
+        #player2-block-bar {
+            background: linear-gradient(90deg, #0088ff, #00ffff);
+            float: right;
+        }
+        
+        .bar {
+            height: 100%;
+            width: 100%;
+            transition: width 0.2s;
+        }
+
+        #player1-health { background: linear-gradient(90deg, #00c6ff, #0072ff); } 
+        #player2-health { 
+            background: linear-gradient(90deg, #ff3333, #ff0000); 
+            transform-origin: right; 
+        } 
+
+        #timer {
+            background: #fff;
+            color: #000;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            border: 4px solid #000;
+            font-weight: bold;
+        }
+
+        .name-tag {
+            color: white;
+            font-size: 24px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0 #000;
+            position: absolute;
+            top: -35px;
+        }
+        .name-tag.left { left: 0; }
+        .name-tag.right { right: 0; }
+
+        /* MENÚS */
+        .fullscreen-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        h1 {
+            font-size: 100px;
+            margin-bottom: 30px;
+            text-shadow: 4px 4px 0 #ff0000;
+            letter-spacing: 5px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 60px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .menu-btn {
+            background: transparent;
+            color: white;
+            border: 4px solid white;
+            padding: 15px 40px;
+            font-size: 30px;
+            font-family: 'Impact', sans-serif;
+            margin: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+            width: 400px;
+        }
+
+        .menu-btn:hover {
+            background: white;
+            color: black;
+            transform: scale(1.05);
+        }
+
+        .option-row {
+            margin: 20px 0;
+            text-align: center;
+            width: 100%;
+        }
+        .option-label {
+            font-size: 30px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        input[type=range] {
+            width: 400px;
+            height: 25px;
+            cursor: pointer;
+        }
+
+        #controls-hint-display {
+            position: absolute;
+            top: 65%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+            z-index: 24;
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border: 2px solid white;
+            border-radius: 10px;
+        }
+        .key-box {
+            display: inline-block;
+            border: 2px solid white;
+            padding: 5px 10px;
+            margin: 0 5px;
+            font-family: monospace;
+            font-size: 24px;
+            background: #333;
+        }
+        .action-text {
+            font-size: 20px;
+            margin-right: 15px;
+            color: #ccc;
+        }
+
+        #countdown-display {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff700;
+            font-size: 150px;
+            display: none;
+            text-shadow: 5px 5px 0 #ff0000;
+            z-index: 25;
+            font-weight: bold;
+        }
+
+        #display-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 100px;
+            display: none;
+            text-shadow: 5px 5px 0 #000;
+            z-index: 30;
+            text-align: center;
+        }
+        
+        #restart-btn {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        #click-hint {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        #debug-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-family: monospace;
+            font-size: 12px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        #made-in-ia {
+            position: fixed; 
+            bottom: 0;
+            right: 0;
+            width: 50px; 
+            height: 100px; 
+            background-color: #FF0000; 
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            writing-mode: vertical-lr; 
+            transform: rotate(180deg); 
+            z-index: 100; 
+            padding: 5px; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <div id="main-menu" class="fullscreen-menu" onclick="tryPlayMenuMusic()">
+            <h1>LUISKIS COMBAT:<br>LOS PUTEROS</h1>
+            <button class="menu-btn" onclick="event.stopPropagation(); initGameSequence('pve')">1 JUGADOR (VS BOT)</button>
+            <button class="menu-btn" onclick="event.stopPropagation(); initGameSequence('pvp')">2 JUGADORES</button>
+            <button class="menu-btn" onclick="event.stopPropagation(); openOptions()">OPCIONES</button>
+            <div id="click-hint">(Haz clic para activar la música)</div>
+        </div>
+
+        <div id="options-menu" class="fullscreen-menu" style="display:none;">
+            <h2>OPCIONES</h2>
+            <div class="option-row">
+                <label class="option-label">VOLUMEN MÚSICA</label>
+                <input type="range" id="music-slider" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume()">
+            </div>
+            <div class="option-row">
+                <label class="option-label">VOLUMEN GOLPES</label>
+                <input type="range" id="sfx-slider" min="0" max="1" step="0.05" value="0.15" oninput="updateVolume()">
+            </div>
+            <button class="menu-btn" onclick="event.stopPropagation(); closeOptions()">VOLVER</button>
+        </div>
+
+        <div id="countdown-display">3</div>
+        
+        <div id="controls-hint-display">
+            <span class="action-text">MOVERSE:</span> <span class="key-box">A</span> <span class="key-box">D</span> <span class="key-box">W</span><br><br>
+            <span class="action-text">ATACAR:</span> <span class="key-box">ESPACIO</span><br><br>
+            <span id="p1-block-hint">
+                <span class="action-text">BLOQ J1:</span> <span class="key-box">S</span>
+            </span>
+            <span id="p2-block-hint" style="display:none; margin-left: 20px;">
+                <span class="action-text">BLOQ J2:</span> <span class="key-box">🡣</span>
+            </span>
+        </div>
+
+        <div id="ui-layer">
+            <div class="stats-wrapper">
+                <div class="health-bar-container">
+                    <div class="name-tag left">El Luiskis</div>
+                    <div class="bar" id="player1-health"></div>
+                </div>
+                <div class="block-bar-container" id="p1-block-container">
+                    <div class="stamina-bar" id="player1-block-bar"></div>
+                </div>
+            </div>
+
+            <div id="timer">60</div>
+
+            <div class="stats-wrapper" style="align-items: flex-end;"> 
+                <div class="health-bar-container">
+                    <div class="name-tag right">Rufo</div>
+                    <div class="bar" id="player2-health"></div> 
+                </div>
+                <div class="block-bar-container" id="p2-block-container">
+                    <div class="stamina-bar" id="player2-block-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="display-text">
+            <span id="result-msg">KO</span>
+            <button id="restart-btn" class="menu-btn" onclick="location.reload()">JUGAR OTRA VEZ</button>
+        </div>
+
+        <div id="debug-hint">Pulsa 'H' para ver hitboxes</div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+<div id="made-in-ia">Made In IA</div>
+
+<script>
+    const canvas = document.querySelector('canvas');
+    const c = canvas.getContext('2d');
+
+    canvas.width = 1280;
+    canvas.height = 720;
+
+    const gravity = 0.7;
+    let gameMode = 'pvp'; 
+    let gameRunning = false;
+    let isCountingDown = false;
+    let showHitboxes = false; 
+
+    const menuMusic = new Audio('./menu.mp3');
+    menuMusic.loop = true; 
+    menuMusic.volume = 0.5;
+
+    const fightMusic = new Audio('./pelea.mp3');
+    fightMusic.loop = true;
+    fightMusic.volume = 0.5;
+
+    const hitSound = new Audio('./golpe.mp3');
+    hitSound.volume = 0.15;
+
+    let musicStarted = false;
+    function tryPlayMenuMusic() {
+        if (!musicStarted && !gameRunning && !isCountingDown) {
+            menuMusic.play().catch(e => console.log("Esperando interacción para audio"));
+            musicStarted = true;
+            document.getElementById('click-hint').style.display = 'none';
+        }
+    }
+
+    function openOptions() {
+        document.getElementById('main-menu').style.display = 'none';
+        document.getElementById('options-menu').style.display = 'flex';
+    }
+
+    function closeOptions() {
+        document.getElementById('options-menu').style.display = 'none';
+        document.getElementById('main-menu').style.display = 'flex';
+    }
+
+    function updateVolume() {
+        const musicVol = document.getElementById('music-slider').value;
+        const sfxVol = document.getElementById('sfx-slider').value;
+
+        menuMusic.volume = musicVol;
+        fightMusic.volume = musicVol;
+        hitSound.volume = sfxVol;
+    }
+
+    const luiskisIdleImg = new Image(); luiskisIdleImg.src = './luiskis_idle.png';
+    const luiskisRunImg = new Image(); luiskisRunImg.src = './luiskis_run.png';
+    const luiskisAttackImg = new Image(); luiskisAttackImg.src = './luiskis_attack.png';
+    const luiskisJumpImg = new Image(); luiskisJumpImg.src = './luiskis_jump.png';
+
+    const rufoIdleImg = new Image(); rufoIdleImg.src = './rufo_idle.png';
+    const rufoRunImg = new Image(); rufoRunImg.src = './rufo_run.png';
+    const rufoAttackImg = new Image(); rufoAttackImg.src = './rufo_attack.png';
+    const rufoJumpImg = new Image(); rufoJumpImg.src = './rufo_jump.png';
+
+    class Particle {
+        constructor({ position, velocity, color, radius = 3, fades = true }) {
+            this.position = position;
+            this.velocity = velocity;
+            this.radius = radius;
+            this.color = color;
+            this.opacity = 1;
+            this.fades = fades;
+        }
+
+        draw() {
+            c.save();
+            c.globalAlpha = this.opacity;
+            c.beginPath();
+            c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+            c.fillStyle = this.color;
+            c.fill();
+            c.closePath();
+            c.restore();
+        }
+
+        update() {
+            this.draw();
+            this.position.x += this.velocity.x;
+            this.position.y += this.velocity.y;
+
+            if (this.fades) {
+                this.opacity -= 0.01;
+            }
+        }
+    }
+
+    const particles = []; 
+
+    class Sprite {
+        constructor({ position, velocity, color = 'red', offset = { x: 0, y: 0 }, name, image, scale = 1, maxHealth = 100, damage = 10, blockElementId }) {
+            this.position = position;
+            this.velocity = velocity;
+            this.width = 50; 
+            this.height = 150;
+            this.lastKey;
+            this.attackBox = {
+                position: { x: this.position.x, y: this.position.y },
+                offset: offset, 
+                width: 100,
+                height: 50
+            };
+            this.color = color;
+            this.isAttacking = false;
+            this.canAttack = true;
+
+            this.health = maxHealth;
+            this.maxHealth = maxHealth; 
+            this.damage = damage; 
+            this.currentDamage = damage; 
+            this.name = name;
+            this.image = image;
+            this.scale = scale; 
+            
+            // BLOQUEO
+            this.isBlocking = false;
+            this.blockStamina = 100; 
+            this.maxBlockStamina = 100;
+            this.blockCooldown = false; 
+            this.blockElementId = blockElementId;
+        }
+
+        draw() {
+            if (this.image) {
+                let drawWidth;
+                let drawHeight;
+                let xCorrection = 0;
+                let yCorrection = 0;
+
+                if (this.name === 'Luiskis') {
+                    const fixedLuiskisWidth = 280;  
+                    const fixedLuiskisHeight = 280; 
+                    drawWidth = fixedLuiskisWidth;
+                    drawHeight = fixedLuiskisHeight;
+                    xCorrection = - (fixedLuiskisWidth - this.width) / 2;
+                    yCorrection = - (fixedLuiskisHeight - this.height) - 1; 
+
+                } else if (this.name === 'Rufo') {
+                    const fixedDrawWidth = 150; 
+                    const fixedDrawHeight = 150; 
+                    drawWidth = fixedDrawWidth;
+                    drawHeight = fixedDrawHeight;
+                    xCorrection = - (fixedDrawWidth - this.width) / 2;
+                    yCorrection = - (fixedDrawHeight - this.height) - 1; 
+                }
+
+                c.drawImage(
+                    this.image, 
+                    this.position.x + xCorrection, 
+                    this.position.y + yCorrection, 
+                    drawWidth, 
+                    drawHeight
+                );
+            } else {
+                c.fillStyle = this.color;
+                c.fillRect(this.position.x, this.position.y, this.width, this.height);
+            }
+
+            if (showHitboxes) {
+                c.strokeStyle = '#00FF00'; 
+                c.lineWidth = 2;
+                c.strokeRect(this.position.x, this.position.y, this.width, this.height);
+                c.fillStyle = 'rgba(0, 255, 0, 0.2)';
+                c.fillRect(this.position.x, this.position.y, this.width, this.height);
+
+                if (this.isAttacking) {
+                    c.strokeStyle = '#FF0000'; 
+                    c.lineWidth = 2;
+                    c.strokeRect(
+                        this.attackBox.position.x, 
+                        this.attackBox.position.y, 
+                        this.attackBox.width, 
+                        this.attackBox.height
+                    );
+                    c.fillStyle = 'rgba(255, 0, 0, 0.4)';
+                    c.fillRect(
+                        this.attackBox.position.x, 
+                        this.attackBox.position.y, 
+                        this.attackBox.width, 
+                        this.attackBox.height
+                    );
+                }
+            }
+        }
+
+        update() {
+            if (!gameRunning && isCountingDown) {
+                this.draw();
+                return; 
+            }
+            if (!gameRunning) return; 
+
+            this.attackBox.position.x = this.position.x + this.attackBox.offset.x;
+            this.attackBox.position.y = this.position.y + this.attackBox.offset.y; 
+
+            this.position.x += this.velocity.x;
+            this.position.y += this.velocity.y;
+
+            if (this.position.y + this.height + this.velocity.y >= canvas.height - 50) {
+                this.velocity.y = 0;
+                this.position.y = canvas.height - 50 - this.height;
+            } else {
+                this.velocity.y += gravity;
+            }
+
+            if (this.position.x < 0) {
+                this.position.x = 0;
+            }
+            if (this.position.x + this.width > canvas.width) {
+                this.position.x = canvas.width - this.width;
+            }
+
+            // STAMINA & BLOQUEO
+            if (this.isBlocking) {
+                this.blockStamina -= 0.7; 
+                
+                if (Math.random() < 0.8) { 
+                    particles.push(new Particle({
+                        position: {
+                            x: this.position.x + this.width / 2 + (Math.random() - 0.5) * 50, 
+                            y: this.position.y + this.height / 2 + (Math.random() - 0.5) * 50
+                        },
+                        velocity: {
+                            x: (Math.random() - 0.5) * 3,
+                            y: (Math.random() - 1.5) * 3 
+                        },
+                        color: '#00FFFF', 
+                        radius: Math.random() * 5 + 2, 
+                        fades: true
+                    }));
+                }
+
+                if (this.blockStamina <= 0) {
+                    this.blockStamina = 0;
+                    this.isBlocking = false;
+                    this.blockCooldown = true; 
+                }
+            } else {
+                if (this.blockStamina < this.maxBlockStamina) {
+                    this.blockStamina += 0.8; 
+                }
+                if (this.blockStamina > 25) { 
+                    this.blockCooldown = false;
+                }
+            }
+            
+            // Actualizar barra UI correspondiente
+            const staminaElement = document.getElementById(this.blockElementId);
+            if (staminaElement) {
+                staminaElement.style.width = this.blockStamina + '%';
+                staminaElement.style.background = this.blockCooldown ? '#555' : (this.name === 'Luiskis' ? 'linear-gradient(90deg, #00ffff, #0088ff)' : 'linear-gradient(90deg, #0088ff, #00ffff)');
+            }
+
+            this.draw(); 
+        }
+
+        attack() {
+            // CAMBIO: Permitir ataque si bloqueas
+            if (isCountingDown || this.isAttacking || !this.canAttack) return; 
+            
+            // SHIELD BASH
+            if (this.isBlocking) {
+                this.currentDamage = this.damage * 0.25; // Daño reducido
+                this.attackBox.width = 220; // RANGO AUMENTADO
+            } else {
+                this.currentDamage = this.damage; 
+                this.attackBox.width = 140; 
+            }
+
+            this.isAttacking = true;
+            this.canAttack = false; 
+            
+            if (this.name === 'Luiskis') this.image = luiskisAttackImg;
+            if (this.name === 'Rufo') this.image = rufoAttackImg;
+
+            const direction = this.attackBox.offset.x > 0 ? 1 : -1;
+            const particleColor = this.name === 'Luiskis' ? '#FFFFFF' : '#FFFF00';
+
+            for (let i = 0; i < 8; i++) {
+                particles.push(new Particle({
+                    position: {
+                        x: this.position.x + this.width / 2,
+                        y: this.position.y + this.height / 2
+                    },
+                    velocity: {
+                        x: direction * (Math.random() * 6 + 3),
+                        y: (Math.random() - 0.5) * 2
+                    },
+                    color: particleColor,
+                    radius: Math.random() * 4
+                }));
+            }
+            
+            setTimeout(() => {
+                this.isAttacking = false;
+                // Resetear rango
+                this.attackBox.width = 140;
+                // Restaurar damage original
+                this.currentDamage = this.damage;
+
+                if (this.name === 'Luiskis') this.image = luiskisIdleImg;
+                if (this.name === 'Rufo') this.image = rufoIdleImg;
+            }, 500); 
+
+            let cooldownTime = 500; 
+            if (this.name === 'Luiskis') cooldownTime = 550; 
+
+            setTimeout(() => {
+                this.canAttack = true;
+            }, cooldownTime);
+        }
+    }
+
+    const player = new Sprite({
+        position: { x: 100, y: 0 }, 
+        velocity: { x: 0, y: 0 },
+        offset: { x: 40, y: 50 }, 
+        name: 'Luiskis',
+        image: luiskisIdleImg,
+        maxHealth: 100, 
+        damage: 10,
+        blockElementId: 'player1-block-bar'
+    });
+    player.width = 70; 
+    player.height = 200; 
+    player.attackBox.width = 140; 
+    player.attackBox.height = 80; 
+
+    const enemy = new Sprite({
+        position: { x: 1000, y: 0 }, 
+        velocity: { x: 0, y: 0 },
+        offset: { x: -100, y: 20 }, 
+        name: 'Rufo',
+        image: rufoIdleImg,
+        blockElementId: 'player2-block-bar'
+    });
+    enemy.width = 60; 
+    enemy.height = 140; 
+    enemy.attackBox.width = 120;
+    enemy.attackBox.height = 60;
+
+
+    const keys = {
+        a: { pressed: false },
+        d: { pressed: false },
+        ArrowRight: { pressed: false },
+        ArrowLeft: { pressed: false },
+        s: { pressed: false }, 
+        ArrowDown: { pressed: false },
+        Enter: { pressed: false } 
+    };
+
+    let botCooldown = false;
+    
+    function updateBot() {
+        if (isCountingDown) return; 
+
+        const distanceX = player.position.x - enemy.position.x;
+        const absDistance = Math.abs(distanceX);
+        const attackRange = 90; 
+        const safeZone = 220; 
+
+        if (player.isBlocking) {
+            if (absDistance < 150) {
+                const retreatSpeed = 5; 
+                if (distanceX > 0) { 
+                    enemy.velocity.x = -retreatSpeed; 
+                    enemy.image = rufoRunImg;
+                    enemy.lastKey = 'ArrowLeft';
+                } else { 
+                    enemy.velocity.x = retreatSpeed; 
+                    enemy.image = rufoRunImg;
+                    enemy.lastKey = 'ArrowRight';
+                }
+            } else {
+                enemy.velocity.x = 0;
+                enemy.image = rufoIdleImg;
+            }
+            if (Math.random() < 0.01) {
+                enemy.attack();
+            }
+            return; 
+        }
+
+        if (player.isAttacking && absDistance < safeZone) {
+            const action = Math.random();
+            if (action < 0.3 && enemy.velocity.y === 0) {
+                enemy.velocity.y = -18; 
+            } else if (action > 0.3 && action < 0.7) {
+                const retreatSpeed = 4;
+                if (distanceX > 0) { 
+                    enemy.velocity.x = -retreatSpeed;
+                    enemy.image = rufoRunImg;
+                    enemy.lastKey = 'ArrowLeft';
+                } else { 
+                    enemy.velocity.x = retreatSpeed;
+                    enemy.image = rufoRunImg;
+                    enemy.lastKey = 'ArrowRight';
+                }
+                return; 
+            }
+        }
+
+        const speed = 4.5; 
+        if (absDistance > attackRange) {
+            if (distanceX > 0) {
+                enemy.velocity.x = speed;
+                enemy.lastKey = 'ArrowRight';
+            } else {
+                enemy.velocity.x = -speed;
+                enemy.lastKey = 'ArrowLeft';
+            }
+            if (!enemy.isAttacking) enemy.image = rufoRunImg;
+
+            if (player.velocity.y < 0 && enemy.velocity.y === 0 && Math.random() < 0.08) {
+                 enemy.velocity.y = -20;
+                 enemy.image = rufoJumpImg;
+            }
+        } else {
+            enemy.velocity.x = 0;
+            if (!enemy.isAttacking) enemy.image = rufoIdleImg;
+        }
+
+        if (absDistance < 200 && !enemy.isAttacking && !botCooldown) { 
+            if (Math.random() < 0.15) {
+                enemy.attack();
+                botCooldown = true;
+                setTimeout(() => { botCooldown = false }, 350); 
+            }
+        }
+    }
+
+    function rectangularCollision({ rectangle1, rectangle2 }) {
+        return (
+            rectangle1.attackBox.position.x + rectangle1.attackBox.width >= rectangle2.position.x &&
+            rectangle1.attackBox.position.x <= rectangle2.position.x + rectangle2.width &&
+            rectangle1.attackBox.position.y + rectangle1.attackBox.height >= rectangle2.position.y &&
+            rectangle1.attackBox.position.y <= rectangle2.position.y + rectangle2.height
+        );
+    }
+
+    function createHitParticles(object, color = '#FF0000') {
+        if(color === '#FF0000') { 
+            hitSound.currentTime = 0;
+            hitSound.play().catch(e => {}); 
+        }
+
+        for (let i = 0; i < 15; i++) {
+            particles.push(new Particle({
+                position: {
+                    x: object.position.x + object.width / 2,
+                    y: object.position.y + object.height / 2
+                },
+                velocity: {
+                    x: (Math.random() - 0.5) * 10,
+                    y: (Math.random() - 0.5) * 10
+                },
+                color: color, 
+                radius: Math.random() * 5
+            }));
+        }
+    }
+
+    function determineWinner({ player, enemy, timerId }) {
+        clearTimeout(timerId);
+        gameRunning = false; 
+        fightMusic.pause();
+        fightMusic.currentTime = 0;
+        
+        document.querySelector('#display-text').style.display = 'block';
+        document.querySelector('#restart-btn').style.display = 'inline-block';
+        
+        const msg = document.querySelector('#result-msg');
+        if (player.health <= 0 && enemy.health <= 0) {
+             msg.innerHTML = 'EMPATE';
+        } else if (player.health > enemy.health) {
+            msg.innerHTML = '¡GANA LUISKIS!';
+        } else {
+            msg.innerHTML = '¡GANA RUFO!';
+        }
+    }
+
+    let timer = 60;
+    let timerId;
+    function decreaseTimer() {
+        if (timer > 0 && gameRunning) {
+            timerId = setTimeout(decreaseTimer, 1000);
+            timer--;
+            document.querySelector('#timer').innerHTML = timer;
+        }
+        if (timer === 0) {
+            determineWinner({ player, enemy, timerId });
+        }
+    }
+
+    function initGameSequence(mode) {
+        menuMusic.pause();
+        menuMusic.currentTime = 0;
+        
+        gameMode = mode;
+
+        const p1BlockContainer = document.getElementById('p1-block-container');
+        const p2BlockContainer = document.getElementById('p2-block-container');
+        const p1BlockHint = document.getElementById('p1-block-hint');
+        const p2BlockHint = document.getElementById('p2-block-hint');
+        
+        p1BlockContainer.style.display = 'block'; 
+        player.blockStamina = 100; 
+
+        if (gameMode === 'pve') {
+            enemy.maxHealth = 160; 
+            enemy.health = 160;
+            enemy.damage = 11;     
+            
+            p2BlockContainer.style.display = 'none'; 
+            p2BlockHint.style.display = 'none';
+        } else {
+            enemy.maxHealth = 100;
+            enemy.health = 100;
+            enemy.damage = 10; 
+            
+            p2BlockContainer.style.display = 'block';
+            p2BlockHint.style.display = 'inline';
+            enemy.blockStamina = 100;
+        }
+        player.health = 100;
+        
+        document.querySelector('#player1-health').style.width = '100%';
+        document.querySelector('#player2-health').style.width = '100%';
+
+        document.querySelector('#main-menu').style.display = 'none';
+        document.querySelector('#ui-layer').style.display = 'flex';
+        
+        document.getElementById('controls-hint-display').style.display = 'block';
+
+        isCountingDown = true;
+        gameRunning = false; 
+        animate(); 
+
+        const countdownEl = document.querySelector('#countdown-display');
+        countdownEl.style.display = 'block';
+
+        let count = 3;
+        countdownEl.innerText = count;
+
+        const countInterval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                countdownEl.innerText = count;
+            } else if (count === 0) {
+                countdownEl.innerText = '¡YA!';
+                countdownEl.style.color = '#ff0000';
+                fightMusic.play().catch(e => console.log("Error audio pelea", e));
+            } else {
+                clearInterval(countInterval);
+                countdownEl.style.display = 'none';
+                document.getElementById('controls-hint-display').style.display = 'none'; 
+                startGame(); 
+            }
+        }, 1000);
+    }
+
+    function startGame() {
+        isCountingDown = false;
+        gameRunning = true;
+        decreaseTimer();
+    }
+
+    function animate() {
+        window.requestAnimationFrame(animate);
+        
+        c.clearRect(0, 0, canvas.width, canvas.height);
+
+        player.update();
+        enemy.update();
+
+        particles.forEach((particle, i) => {
+            if (particle.opacity <= 0) {
+                particles.splice(i, 1);
+            } else {
+                particle.update();
+            }
+        });
+
+        if (!gameRunning && !isCountingDown) return; 
+        if (isCountingDown) return;
+
+        player.velocity.x = 0;
+        enemy.velocity.x = 0;
+
+        // LUISKIS (P1)
+        if (!player.isBlocking) { 
+            if (player.velocity.y === 0 && !player.isAttacking) {
+                if (keys.a.pressed || keys.d.pressed) {
+                    player.image = luiskisRunImg;
+                } else {
+                    player.image = luiskisIdleImg;
+                }
+            }
+            if (keys.a.pressed && player.lastKey === 'a') {
+                player.velocity.x = -5;
+            } else if (keys.d.pressed && player.lastKey === 'd') {
+                player.velocity.x = 5;
+            }
+        } else {
+             // CORRECCIÓN: Si ataca bloqueando, no forzar Idle
+             if (!player.isAttacking) player.image = luiskisIdleImg; 
+        }
+        
+        if (keys.s.pressed && !player.blockCooldown && player.blockStamina > 0) {
+            player.isBlocking = true;
+        } else {
+            player.isBlocking = false;
+        }
+
+        // RUFO (P2 o Bot)
+        if (gameMode === 'pvp') {
+            if (!enemy.isBlocking) {
+                if (enemy.velocity.y === 0 && !enemy.isAttacking) {
+                    if (keys.ArrowLeft.pressed || keys.ArrowRight.pressed) {
+                        enemy.image = rufoRunImg;
+                    } else {
+                        enemy.image = rufoIdleImg;
+                    }
+                }
+                if (keys.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') {
+                    enemy.velocity.x = -5;
+                } else if (keys.ArrowRight.pressed && enemy.lastKey === 'ArrowRight') {
+                    enemy.velocity.x = 5;
+                }
+            } else {
+                 if (!enemy.isAttacking) enemy.image = rufoIdleImg;
+            }
+
+            if (keys.ArrowDown.pressed && !enemy.blockCooldown && enemy.blockStamina > 0) {
+                enemy.isBlocking = true;
+            } else {
+                enemy.isBlocking = false;
+            }
+
+        } else {
+            updateBot(); 
+        }
+
+        // COLISIONES
+        // Luiskis ataca
+        if (
+            rectangularCollision({ rectangle1: player, rectangle2: enemy }) &&
+            player.isAttacking && 
+            player.image === luiskisAttackImg 
+        ) {
+            player.isAttacking = false; 
+            
+            if (enemy.isBlocking) {
+                createHitParticles(enemy, '#00FFFF'); 
+                // Reflejo
+                player.health -= 5;
+                createHitParticles(player, '#FFFFFF'); 
+                document.querySelector('#player1-health').style.width = (player.health < 0 ? 0 : player.health) + '%';
+            } else {
+                enemy.health -= player.currentDamage; 
+                createHitParticles(enemy, '#FF0000'); 
+                
+                let healthPercent = (enemy.health / enemy.maxHealth) * 100;
+                if (healthPercent < 0) healthPercent = 0;
+                document.querySelector('#player2-health').style.width = healthPercent + '%';
+            }
+        }
+
+        // Rufo ataca
+        if (
+            rectangularCollision({ rectangle1: enemy, rectangle2: player }) &&
+            enemy.isAttacking &&
+            enemy.image === rufoAttackImg
+        ) {
+            enemy.isAttacking = false; 
+            
+            if (player.isBlocking) {
+                createHitParticles(player, '#00FFFF'); 
+                // Reflejo
+                enemy.health -= 5; 
+                createHitParticles(enemy, '#FFFFFF'); 
+
+                let healthPercent = (enemy.health / enemy.maxHealth) * 100;
+                if (healthPercent < 0) healthPercent = 0;
+                document.querySelector('#player2-health').style.width = healthPercent + '%';
+
+            } else {
+                player.health -= enemy.currentDamage; // Usar currentDamage por si Rufo usa shield bash en pvp
+                createHitParticles(player, '#FF0000'); 
+                
+                let healthPercent = (player.health / player.maxHealth) * 100;
+                if (healthPercent < 0) healthPercent = 0;
+                document.querySelector('#player1-health').style.width = healthPercent + '%';
+            }
+        }
+
+        if (enemy.health <= 0 || player.health <= 0) {
+            determineWinner({ player, enemy, timerId });
+        }
+    }
+
+    Promise.all([
+        new Promise(resolve => luiskisIdleImg.onload = resolve),
+        new Promise(resolve => rufoIdleImg.onload = resolve)
+    ]).then(() => {
+        // Inicio
+    });
+
+    window.addEventListener('keydown', (event) => {
+        if (event.key.toLowerCase() === 'h') {
+            showHitboxes = !showHitboxes;
+        }
+
+        if (!gameRunning && !isCountingDown) return;
+        if (isCountingDown) return;
+
+        switch (event.key) {
+            // LUISKIS
+            case 'd':
+                keys.d.pressed = true;
+                player.lastKey = 'd';
+                break;
+            case 'a':
+                keys.a.pressed = true;
+                player.lastKey = 'a';
+                break;
+            case 'w':
+                if(player.velocity.y === 0 && !player.isBlocking) { 
+                    player.velocity.y = -20;
+                    player.image = luiskisJumpImg;
+                }
+                break;
+            case ' ':
+                player.attack(); 
+                break;
+            case 's':
+                keys.s.pressed = true;
+                break;
+
+            // RUFO (PVP)
+            case 'Enter':
+                if (gameMode === 'pvp') enemy.attack(); 
+                break;
+            case 'ArrowRight':
+                if (gameMode === 'pvp') {
+                    keys.ArrowRight.pressed = true;
+                    enemy.lastKey = 'ArrowRight';
+                }
+                break;
+            case 'ArrowLeft':
+                if (gameMode === 'pvp') {
+                    keys.ArrowLeft.pressed = true;
+                    enemy.lastKey = 'ArrowLeft';
+                }
+                break;
+            case 'ArrowUp':
+                if (gameMode === 'pvp' && enemy.velocity.y === 0 && !enemy.isBlocking) {
+                    enemy.velocity.y = -20;
+                    enemy.image = rufoJumpImg;
+                }
+                break;
+            case 'ArrowDown':
+                if (gameMode === 'pvp') {
+                    keys.ArrowDown.pressed = true;
+                }
+                break;
+        }
+    });
+
+    window.addEventListener('keyup', (event) => {
+        switch (event.key) {
+            case 'd': keys.d.pressed = false; break;
+            case 'a': keys.a.pressed = false; break;
+            case 'ArrowRight': keys.ArrowRight.pressed = false; break;
+            case 'ArrowLeft': keys.ArrowLeft.pressed = false; break;
+            case 's': keys.s.pressed = false; break; 
+            case 'ArrowDown': keys.ArrowDown.pressed = false; break;
+        }
+    });
+</script>
+</body>
+</html>
